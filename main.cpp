@@ -4,8 +4,8 @@
 void tc1(){
     Dataset dataset;
     dataset.loadFromCSV("mnist.csv");
-    // dataset.printHead();
-    // dataset.printTail();
+    dataset.printHead();
+    dataset.printTail();
     int nRows, nCols;
     dataset.getShape(nRows, nCols);
     cout << "Shape: " << nRows << "x" << nCols << endl;
@@ -24,25 +24,25 @@ void tc1(){
 
 void _tc(){
     Dataset dataset;
-    dataset.loadFromCSV("mnist.csv");
+    dataset.loadFromCSV("mnist_test.csv");
     // dataset.printHead();
     // dataset.printTail();
     int nRows, nCols;
     dataset.getShape(nRows, nCols);
     cout << "Shape: " << nRows << "x" << nCols << endl;
 
-    kNN knn(30);
+    kNN knn(500);
     Dataset X_train, X_test, y_train, y_test;
     Dataset feature = dataset.extract(0, -1, 1, -1);
     Dataset label = dataset.extract(0, -1, 0, 0);
     double test_size = 0.5;
     train_test_split(feature, label, test_size, X_train, X_test, y_train, y_test);
     
-    cout << "k = " << knn.getK() << ", test_size = " << test_size << endl;
-    cout << "train.shape = (" << X_train.getNumRows() << ", "<< X_train.getNumCols() << ")\n"
-        << "X_test.shape = (" << X_test.getNumRows() << ", " << X_test.getNumCols() << ")\n"
-        << "y_train.shape = (" << y_train.getNumRows() << ", " << y_train.getNumCols() << ")\n" 
-        << "y_test.shape = (" << y_test.getNumRows() << ", " << y_test.getNumCols() << ")\n";
+    // cout << "k = " << knn.getK() << ", test_size = " << test_size << endl;
+    // cout << "train.shape = (" << X_train.getNumRows() << ", "<< X_train.getNumCols() << ")\n"
+    //     << "X_test.shape = (" << X_test.getNumRows() << ", " << X_test.getNumCols() << ")\n"
+    //     << "y_train.shape = (" << y_train.getNumRows() << ", " << y_train.getNumCols() << ")\n" 
+    //     << "y_test.shape = (" << y_test.getNumRows() << ", " << y_test.getNumCols() << ")\n";
 
     knn.fit(X_train, y_train);
     Dataset y_pred = knn.predict(X_test);
@@ -596,7 +596,7 @@ void testIterator(){
 
 int main() {
     auto start = std::chrono::steady_clock::now();
-    _tc();
+    tc1();
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
