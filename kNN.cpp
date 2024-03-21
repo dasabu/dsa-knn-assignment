@@ -14,20 +14,23 @@ void train_test_split(Dataset& X, Dataset& y, double test_size, // Input
     y_test = y.extract(testStartRow, numSamples - 1, 0, -1);
 }
 
-int EuclideanDistance(const List<int> * list1, const List<int> * list2){
-    bool ok = (list1 != nullptr) && (list2 != nullptr) 
-                && (list1->length() == list2->length()) && (list1->length() > 0);
-    if (!ok){
-        cout << "Cannot calculate Euclidean Distance of these 2 lists\n";
-        return -1;
-    }
+int EuclideanDistance(List<int> * list1, List<int> * list2) {  
+    // Not using Iterator
+    // double dis = 0;
+    // for (int i = 0; i < list1->length(); i++){
+    //     double diff = list1->get(i) - list2->get(i);
+    //     dis += diff * diff;
+    // }
+
+    //! Iterator version
     double dis = 0;
-    for (int i = 0; i < list1->length(); i++){
-        double diff = list1->get(i) - list2->get(i);
+    Iterator<int> it1 = list1->begin();
+    Iterator<int> it2 = list2->begin();
+    for (it1 = list1->begin(), it2 = list2->begin(); it1 != list1->end() && it2 != list2->end(); ++it1, ++it2){
+        double diff = (*it1) - (*it2);
         dis += diff * diff;
     }
-    // double res = sqrt(dis);
-    // return res;
+
     return dis;
 }
 

@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include <typeinfo>
 
 /* TODO: Please design your data structure carefully so that you can work with the given dataset
  *       in this assignment. The below structures are just some suggestions.
@@ -20,6 +21,9 @@ public:
 };
 
 template<typename T>
+class Iterator;
+
+template<typename T>
 class List {
 public:
     virtual ~List() = default;
@@ -32,6 +36,71 @@ public:
     virtual void clear() = 0;
     virtual void print() const = 0;
     virtual void reverse() = 0;
+    //* Self-defined methods:
+    virtual Node<T>* getFirst() const = 0;
+    virtual class Iterator<T> begin() = 0;
+    virtual class Iterator<T> end() = 0;
+};
+
+template<typename T>
+class Iterator {
+private:
+    List<T>* list;
+    Node<T>* current;
+    int index;
+public:
+    Iterator(){
+        this->list = nullptr;
+        this->current = nullptr;
+        this->index = -1;
+    }
+    Iterator(List<T> * list, bool begin){
+        this->list = list;
+        if (begin){
+            if (this->list){
+                this->current = this->list->getFirst();
+                this->index = 0;
+            }
+            else {
+                this->current = nullptr;
+                this->index = -1;
+            }
+        }
+        else {
+            this->current = 0;
+            if (this->list) this->index = this->list->length();
+            else this->index = 0;
+        }
+    }
+    Iterator& operator=(const Iterator& it){
+        this->list = it.list;
+        this->current = it.current;
+        this->index = it.index;
+
+        return *this;
+    }
+    T& operator*(){
+        if (this->current != nullptr) return this->current->value;
+        else throw std::out_of_range("get(): Out of range");
+    }
+    bool operator!=(const Iterator& it){
+        return ((this->current != it.current) || (this->index != it.index));
+    }
+     // Prefix ++ overload
+    Iterator &operator++(){
+        if (this->current != nullptr){
+            if (this->index == -1) this->current = this->list->getFirst();
+            else this->current = this->current->next;
+            
+            this->index++;
+            
+            return *this;
+        }
+        else throw std::out_of_range("get(): Out of range");
+    }
+    List<T> * getList() { return this->list; }
+    Node<T> * getCurrent() { return this->current; }
+    int getIndex(){ return this->index; }
 };
 
 template<typename T>
@@ -174,6 +243,9 @@ public:
         }
     }
     // * Self-defined method: 
+    Node<T>* getFirst() const {
+        return this->head;
+    }
     void pushWithLimit(int distance, int label, int limit){
         T distanceWithLabel = makeDistanceWithLabel(distance, label);
         if (this->size < limit){
@@ -191,10 +263,13 @@ public:
             if (maxValue > distance) this->get(maxIndex) = distanceWithLabel;
         }
     }
+    // * For Iterator
+    Iterator<T> begin() { return Iterator<T>(this, true); }
+    Iterator<T> end() { return Iterator<T>(this, false); }
 };
 
 int getMaxLabel(const LinkedList<unsigned long int> * list);
-int EuclideanDistance(const List<int> * list1, const List<int> * list2);
+int EuclideanDistance(List<int> * list1, List<int> * list2);
 
 class Dataset {
 private:
@@ -210,14 +285,12 @@ public:
         this->numRows = 0;
         this->numCols = 0;
     }
-
     Dataset(List<List<int>*>* data, List<string>* features, int numRows, int numCols){
         this->data = data;
         this->features = features;
         this->numRows = numRows;
         this->numCols = numCols;
     }
-
     ~Dataset(){
         if (this->features){
             this->features->clear();
@@ -417,34 +490,17 @@ public:
 
         return newDataset;
     }
-
     // * Self-defined methods 
     // & Getter 
-    List<List<int>*>* getData() const{
-        return this->data;
-    }
-    List<string>* getFeatures() const{
-        return this->features;
-    }
-    int getNumRows() const{
-        return this->numRows;
-    }
-    int getNumCols() const{
-        return this->numCols;
-    }
+    List<List<int>*>* getData() const{ return this->data; }
+    List<string>* getFeatures() const{ return this->features; }
+    int getNumRows() const{ return this->numRows; }
+    int getNumCols() const{ return this->numCols; }
     // & Setter 
-    void setData(List<List<int>*> * otherData){
-        this->data = otherData;
-    }
-    void setFeatures(List<string> * otherFeatures){
-        this->features = otherFeatures;
-    }
-    void setNumRows(int numRows){
-        this->numRows = numRows;
-    }
-    void setNumCols(int numCols){
-        this->numCols = numCols;
-    }
+    void setData(List<List<int>*> * otherData){ this->data = otherData; }
+    void setFeatures(List<string> * otherFeatures){ this->features = otherFeatures; }
+    void setNumRows(int numRows){ this->numRows = numRows; }
+    void setNumCols(int numCols){ this->numCols = numCols; }
 };
 
 class kNN {
@@ -454,16 +510,12 @@ private:
     Dataset X_train;
     Dataset y_train;
 public:
-    kNN(int k = 5){
-        this->k = k;
-    }
+    kNN(int k = 5){ this->k = k; }
     void fit(const Dataset& X_train, const Dataset& y_train){
         this->X_train = X_train;
         this->y_train = y_train;
 
-        if (this->k > X_train.getNumRows()) 
-            throw std::out_of_range("get(): Out of range");
-
+        if (this->k > X_train.getNumRows()) throw std::out_of_range("get(): Out of range");
     }
     Dataset predict(const Dataset& X_test)
     {
@@ -472,11 +524,15 @@ public:
 
         List<List<int>*> * pred_list = new LinkedList<List<int>*>();
 
-        for (int i = 0; i < X_test.getNumRows(); i++){
+        //! Iterator version
+        Iterator<List<int>*> it_X_test, it_X_train, it_y_train;
+        for (it_X_test = X_test.getData()->begin(); it_X_test != X_test.getData()->end(); ++it_X_test){
             LinkedList<unsigned long int> * distances = new LinkedList<unsigned long int>();
-            for (int j = 0; j < this->X_train.getNumRows(); j++){
-                int dis = EuclideanDistance(X_test.getData()->get(i), this->X_train.getData()->get(j));
-                distances->pushWithLimit(dis, this->y_train.getData()->get(j)->get(0), this->k);
+            for (it_X_train = this->X_train.getData()->begin(), it_y_train = this->y_train.getData()->begin();
+                it_X_train != X_train.getData()->end() && it_y_train != y_train.getData()->end();
+                ++it_X_train, ++it_y_train){
+                int dis = EuclideanDistance(*it_X_test, *it_X_train);
+                distances->pushWithLimit(dis, (*it_y_train)->get(0), this->k);
             }
             List<int> * tmp = new LinkedList<int>();
             tmp->push_back(getMaxLabel(distances));
@@ -485,35 +541,47 @@ public:
             delete distances;
         }
 
-        Dataset y_pred(pred_list, pred_features, X_test.getNumRows(), 1);
-        
-        return y_pred;
-    }
-    double score(const Dataset& y_test, const Dataset& y_pred)
-    {
-        int correctLabel = 0, totalLabel = y_test.getNumRows();
-        for (int i = 0; i < totalLabel; i++){
-            if (y_pred.getData()->get(i)->get(0) == y_test.getData()->get(i)->get(0)){
-                correctLabel++;
-            }
-        }
-        
-        double accuracy = 1.0 * correctLabel / totalLabel;
+        //! Not using Iterator
+        // for (int i = 0; i < X_test.getNumRows(); i++){
+        //     LinkedList<unsigned long int> * distances = new LinkedList<unsigned long int>();
+        //     for (int j = 0; j < this->X_train.getNumRows(); j++){
+        //         int dis = EuclideanDistance(X_test.getData()->get(i), this->X_train.getData()->get(j));
+        //         distances->pushWithLimit(dis, this->y_train.getData()->get(j)->get(0), this->k);
+        //     }
+        //     List<int> * tmp = new LinkedList<int>();
+        //     tmp->push_back(getMaxLabel(distances));
+        //     pred_list->push_back(tmp);
 
+        //     delete distances;
+        // }
+
+        return Dataset(pred_list, pred_features, X_test.getNumRows(), 1);
+    }
+    double score(const Dataset& y_test, const Dataset& y_pred) {
+        int correctLabel = 0, totalLabel = y_test.getNumRows();
+        //! Iterator version
+        Iterator<List<int>*> it_y_test, it_y_pred;
+        for (it_y_pred = y_pred.getData()->begin(), it_y_test = y_test.getData()->begin();
+            it_y_pred != y_pred.getData()->end() && it_y_test != y_test.getData()->end();
+            ++it_y_pred, ++it_y_test){
+            if ((*it_y_pred)->get(0) == (*it_y_test)->get(0)) correctLabel++;
+        }
+
+        //! Not using Iterator
+        // for (int i = 0; i < totalLabel; i++){
+        //     if (y_pred.getData()->get(i)->get(0) == y_test.getData()->get(i)->get(0)){
+        //         correctLabel++;
+        //     }
+        // }
+        double accuracy = 1.0 * correctLabel / totalLabel;
         return accuracy;
     }
 
     // * Self-defined methods: 
     // & Getter 
-    int getK(){
-        return this->k;
-    }
-    Dataset getX_train(){
-        return this->X_train;
-    }
-    Dataset getY_train(){
-        return this->y_train;
-    }
+    int getK(){ return this->k; }
+    Dataset getX_train(){ return this->X_train; }
+    Dataset getY_train(){ return this->y_train; }
 };
 
 void train_test_split(Dataset& X, Dataset& y, double test_size, // Input

@@ -31,18 +31,14 @@ void _tc(){
     dataset.getShape(nRows, nCols);
     cout << "Shape: " << nRows << "x" << nCols << endl;
 
-    kNN knn(30);
+    kNN knn(35);
     Dataset X_train, X_test, y_train, y_test;
     Dataset feature = dataset.extract(0, -1, 1, -1);
     Dataset label = dataset.extract(0, -1, 0, 0);
     double test_size = 0.5;
     train_test_split(feature, label, test_size, X_train, X_test, y_train, y_test);
-    
+
     cout << "k = " << knn.getK() << ", test_size = " << test_size << endl;
-    cout << "train.shape = (" << X_train.getNumRows() << ", "<< X_train.getNumCols() << ")\n"
-        << "X_test.shape = (" << X_test.getNumRows() << ", " << X_test.getNumCols() << ")\n"
-        << "y_train.shape = (" << y_train.getNumRows() << ", " << y_train.getNumCols() << ")\n" 
-        << "y_test.shape = (" << y_test.getNumRows() << ", " << y_test.getNumCols() << ")\n";
 
     knn.fit(X_train, y_train);
     Dataset y_pred = knn.predict(X_test);
@@ -515,15 +511,15 @@ void testIterator(){
     }
     cout << endl;
 
-    Iterator<List<int>*> it;
-    for (it = data->begin(); it != data->end(); ++it){
-        List<int> * currList = *it;
-        Iterator<int> ite;
-        for (ite = currList->begin(); ite != currList->end(); ++ite){
-            cout << *ite << " ";
-        }
-        cout << endl;
-    }
+    // Iterator<List<int>*> it;
+    // for (it = data->begin(); it != data->end(); ++it){
+    //     List<int> * currList = *it;
+    //     Iterator<int> ite;
+    //     for (ite = currList->begin(); ite != currList->end(); ++ite){
+    //         cout << *ite << " ";
+    //     }
+    //     cout << endl;
+    // }
     // int cnt = 0;
 
     // while(){
@@ -596,10 +592,11 @@ void testIterator(){
 
 int main() {
     auto start = std::chrono::steady_clock::now();
-    _tc();
+    tc1();
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
+    // In ra thời gian chạy
     cout << "-----------------------------\nTime: " << duration << " ms." << endl;
 
     return 0;
