@@ -339,6 +339,7 @@ public:
             }
 
             this->data->clear();
+            
             for (int i = 0; i < other.data->length(); i++) {
                 List<int>* newInnerList = new LinkedList<int>();
                 for (int j = 0; j < other.data->get(i)->length(); j++) {

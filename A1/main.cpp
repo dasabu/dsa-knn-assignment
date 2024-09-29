@@ -24,14 +24,14 @@ void tc1(){
 
 void _tc(){
     Dataset dataset;
-    dataset.loadFromCSV("mnist_test.csv");
+    dataset.loadFromCSV("mnist.csv");
     // dataset.printHead();
     // dataset.printTail();
     int nRows, nCols;
     dataset.getShape(nRows, nCols);
     cout << "Shape: " << nRows << "x" << nCols << endl;
 
-    kNN knn(500);
+    kNN knn(40);
     Dataset X_train, X_test, y_train, y_test;
     Dataset feature = dataset.extract(0, -1, 1, -1);
     Dataset label = dataset.extract(0, -1, 0, 0);
@@ -596,7 +596,7 @@ void testIterator(){
 
 int main() {
     auto start = std::chrono::steady_clock::now();
-    tc1();
+    _tc();
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 

@@ -1,0 +1,24 @@
+{
+  "files.associations": {
+    "__hash_table": "cpp",
+    "__split_buffer": "cpp",
+    "atomic": "cpp",
+    "deque": "cpp",
+    "ios": "cpp",
+    "list": "cpp",
+    "string": "cpp",
+    "system_error": "cpp",
+    "unordered_map": "cpp",
+    "vector": "cpp",
+    "filesystem": "cpp",
+    "__node_handle": "cpp",
+    "iostream": "cpp",
+    "ostream": "cpp",
+    "new": "cpp",
+    "iosfwd": "cpp",
+    "array": "cpp",
+    "queue": "cpp",
+    "string_view": "cpp",
+    "functional": "cpp"
+  }
+}

@@ -68,7 +68,9 @@
     "algorithm": "cpp",
     "__memory": "cpp",
     "filesystem": "cpp",
-    "functional": "cpp"
+    "functional": "cpp",
+    "list": "cpp",
+    "queue": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }
